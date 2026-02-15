@@ -1,6 +1,6 @@
 # DeFi MCP
 
-An MCP server that gives AI agents native access to DeFi. 10 chains, 25 tools, every major protocol — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
+An MCP server that gives AI agents native access to DeFi. 10 chains, 29 tools, every major protocol — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
 
 Connect it to Claude, Cursor, or any MCP-compatible client and interact with DeFi using natural language.
 
@@ -128,6 +128,21 @@ Walks through the full capability set: infrastructure overview, live market data
 | `defi_lending_borrow_tx` | Build an unsigned borrow transaction. |
 | `defi_lending_repay_tx` | Build an unsigned repay transaction. |
 
+### Lending (Compound V3)
+
+| Tool | Description |
+|------|-------------|
+| `defi_compound_supply_tx` | Build an unsigned transaction to supply USDC into Compound V3. |
+| `defi_compound_withdraw_tx` | Build an unsigned transaction to withdraw USDC from Compound V3. |
+
+### Liquid Staking (Lido)
+
+| Tool | Description |
+|------|-------------|
+| `defi_lido_stake_tx` | Build an unsigned transaction to stake ETH and receive stETH. |
+| `defi_lido_wrap_tx` | Build an unsigned transaction to wrap stETH into wstETH. |
+| `defi_lido_unwrap_tx` | Build an unsigned transaction to unwrap wstETH back to stETH. |
+
 ### Prediction Markets (Polymarket)
 
 | Tool | Description |
@@ -181,7 +196,8 @@ src/
 │   ├── ens/            # ENS resolution
 │   ├── lending/        # Aave V3 (markets, positions, tx building)
 │   ├── polymarket/     # Polymarket prediction markets
-│   ├── compound-v3/    # Compound V3 ABIs & addresses
+│   ├── compound-v3/    # Compound V3 (supply/withdraw tx building)
+│   ├── lido/           # Lido liquid staking (stake, wrap, unwrap)
 │   ├── wallet-intelligence/  # Multi-protocol wallet scanning
 │   │   └── scanners/         # Native, ERC20, Aave, Uniswap V3, Compound V3, Lido, Polymarket
 │   └── yield-finder/         # Cross-chain yield optimization
