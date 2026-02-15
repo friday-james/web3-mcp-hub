@@ -1,4 +1,6 @@
 import type { z } from "zod";
+import type { ProtocolScanner } from "./scanner-types.js";
+import type { YieldSource } from "./yield-types.js";
 
 // ============================================================
 // Chain Types
@@ -134,12 +136,22 @@ export interface PluginContext {
   getChainAdapterForChain(chainId: string): ChainAdapter;
   getAllChains(): ChainInfo[];
   config: AppConfig;
+  getScanners(): ProtocolScanner[];
+  getYieldSources(): YieldSource[];
+}
+
+export interface PluginMetadata {
+  author?: string;
+  repository?: string;
+  tags?: string[];
+  supportedChains?: string[];
 }
 
 export interface DefiPlugin {
   readonly name: string;
   readonly description: string;
   readonly version: string;
+  readonly metadata?: PluginMetadata;
 
   initialize(context: PluginContext): Promise<void>;
   getTools(): ToolDefinition[];

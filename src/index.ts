@@ -25,8 +25,17 @@ import {
   BridgePlugin,
   EnsPlugin,
   LendingPlugin,
+  WalletIntelligencePlugin,
+  YieldFinderPlugin,
 } from "./plugins/index.js";
 import { registerAllTools } from "./tools/register.js";
+
+// Scanners & Yield Sources
+import { NativeBalanceScanner } from "./plugins/wallet-intelligence/scanners/native-scanner.js";
+import { Erc20Scanner } from "./plugins/wallet-intelligence/scanners/erc20-scanner.js";
+import { AaveV3Scanner } from "./plugins/wallet-intelligence/scanners/aave-scanner.js";
+import { UniswapV3LPScanner } from "./plugins/wallet-intelligence/scanners/uniswap-v3-scanner.js";
+import { AaveYieldSource } from "./plugins/yield-finder/sources/aave-yield-source.js";
 
 async function main() {
   const config = loadConfig();
@@ -64,6 +73,19 @@ async function main() {
   await registry.registerPlugin(new BridgePlugin());
   await registry.registerPlugin(new EnsPlugin());
   await registry.registerPlugin(new LendingPlugin());
+
+  // 3b. Register protocol scanners (for wallet intelligence)
+  registry.registerScanner(new NativeBalanceScanner());
+  registry.registerScanner(new Erc20Scanner());
+  registry.registerScanner(new AaveV3Scanner());
+  registry.registerScanner(new UniswapV3LPScanner());
+
+  // 3c. Register yield sources (for intent engine)
+  registry.registerYieldSource(new AaveYieldSource());
+
+  // 3d. Register intelligence plugins
+  await registry.registerPlugin(new WalletIntelligencePlugin());
+  await registry.registerPlugin(new YieldFinderPlugin());
 
   // 4. Create MCP server
   const server = new McpServer({

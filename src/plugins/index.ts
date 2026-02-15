@@ -11,3 +11,5 @@ export { ApprovePlugin } from "./approve/plugin.js";
 export { BridgePlugin } from "./bridge/plugin.js";
 export { EnsPlugin } from "./ens/plugin.js";
 export { LendingPlugin } from "./lending/plugin.js";
+export { WalletIntelligencePlugin } from "./wallet-intelligence/plugin.js";
+export { YieldFinderPlugin } from "./yield-finder/plugin.js";
