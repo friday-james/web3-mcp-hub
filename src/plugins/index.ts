@@ -13,3 +13,6 @@ export { EnsPlugin } from "./ens/plugin.js";
 export { LendingPlugin } from "./lending/plugin.js";
 export { WalletIntelligencePlugin } from "./wallet-intelligence/plugin.js";
 export { YieldFinderPlugin } from "./yield-finder/plugin.js";
+export { PolymarketPlugin } from "./polymarket/plugin.js";
+export { ZeroXAggregator } from "./swap/aggregators/zerox.js";
+export { ParaSwapAggregator } from "./swap/aggregators/paraswap.js";

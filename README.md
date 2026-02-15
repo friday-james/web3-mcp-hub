@@ -1,6 +1,6 @@
 # DeFi MCP
 
-An MCP server that gives AI agents native access to DeFi. 10 chains, 21 tools, every major protocol — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
+An MCP server that gives AI agents native access to DeFi. 10 chains, 25 tools, every major protocol — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
 
 Connect it to Claude, Cursor, or any MCP-compatible client and interact with DeFi using natural language.
 
@@ -14,19 +14,25 @@ Connect it to Claude, Cursor, or any MCP-compatible client and interact with DeF
 ## Quick Start
 
 ```bash
-# Install dependencies
-npm install
-
-# Build
-npm run build
-
-# Run the MCP server
-npm start
+git clone https://github.com/njamez/defi-mcp.git
+cd defi-mcp
+./setup.sh
 ```
 
-### Connect to Claude Desktop
+Or manually:
 
-Add to your Claude Desktop config (`~/.claude/claude_desktop_config.json`):
+```bash
+npm install
+npm run build
+```
+
+### Connect to Your AI Tool
+
+After building, add the MCP server config to your client. Replace `/path/to/defi-mcp` with the actual path.
+
+#### Claude Code
+
+Add `.mcp.json` to your project root (or run `claude mcp add defi-mcp node /path/to/defi-mcp/dist/index.js`):
 
 ```json
 {
@@ -38,6 +44,46 @@ Add to your Claude Desktop config (`~/.claude/claude_desktop_config.json`):
   }
 }
 ```
+
+#### Claude Desktop
+
+Add to `~/.claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "defi-mcp": {
+      "command": "node",
+      "args": ["/path/to/defi-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+#### Cursor
+
+Add `.cursor/mcp.json` to your project root:
+
+```json
+{
+  "mcpServers": {
+    "defi-mcp": {
+      "command": "node",
+      "args": ["/path/to/defi-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+#### OpenClaw / Other MCP Clients
+
+Use these settings in your MCP client configuration:
+
+| Setting | Value |
+|---------|-------|
+| **Command** | `node /path/to/defi-mcp/dist/index.js` |
+| **Transport** | `stdio` |
+| **Protocol** | MCP (Model Context Protocol) |
 
 ### Run the Demo
 
@@ -68,7 +114,7 @@ Walks through the full capability set: infrastructure overview, live market data
 
 | Tool | Description |
 |------|-------------|
-| `defi_swap_quote` | Get a swap quote (price, output amount, price impact) via Li.Fi, Jupiter, or Skip. |
+| `defi_swap_quote` | Get a swap quote (price, output amount, price impact) via Li.Fi, Jupiter, Skip, 0x, or ParaSwap. |
 | `defi_swap_build_tx` | Build an unsigned swap transaction ready for signing. |
 
 ### Lending (Aave V3)
@@ -81,6 +127,15 @@ Walks through the full capability set: infrastructure overview, live market data
 | `defi_lending_withdraw_tx` | Build an unsigned withdraw transaction. |
 | `defi_lending_borrow_tx` | Build an unsigned borrow transaction. |
 | `defi_lending_repay_tx` | Build an unsigned repay transaction. |
+
+### Prediction Markets (Polymarket)
+
+| Tool | Description |
+|------|-------------|
+| `defi_polymarket_markets` | List active prediction markets with odds, volume, and end dates. |
+| `defi_polymarket_positions` | Get a wallet's open positions and P&L on Polymarket. |
+| `defi_polymarket_quote` | Get the current price for an outcome token. |
+| `defi_polymarket_build_tx` | Build an unsigned transaction to split USDC into YES/NO outcome tokens. |
 
 ### Cross-chain
 
@@ -117,7 +172,7 @@ src/
 ├── plugins/
 │   ├── token-info/     # Token metadata & pricing (CoinGecko)
 │   ├── balances/       # Token balance lookups
-│   ├── swap/           # DEX aggregators (Li.Fi, Jupiter, Skip)
+│   ├── swap/           # DEX aggregators (Li.Fi, Jupiter, Skip, 0x, ParaSwap)
 │   ├── gas/            # Gas price feeds
 │   ├── portfolio/      # Cross-chain portfolio
 │   ├── tx-status/      # Transaction tracking
@@ -125,10 +180,12 @@ src/
 │   ├── bridge/         # Cross-chain bridges (Li.Fi)
 │   ├── ens/            # ENS resolution
 │   ├── lending/        # Aave V3 (markets, positions, tx building)
+│   ├── polymarket/     # Polymarket prediction markets
+│   ├── compound-v3/    # Compound V3 ABIs & addresses
 │   ├── wallet-intelligence/  # Multi-protocol wallet scanning
-│   │   └── scanners/         # Native, ERC20, Aave, Uniswap V3
+│   │   └── scanners/         # Native, ERC20, Aave, Uniswap V3, Compound V3, Lido, Polymarket
 │   └── yield-finder/         # Cross-chain yield optimization
-│       └── sources/          # Aave yield source
+│       └── sources/          # Aave V3, Compound V3, Lido
 └── tools/              # MCP tool registration & schemas
 ```
 
@@ -161,7 +218,7 @@ interface ProtocolScanner {
 }
 ```
 
-Built-in scanners: Native tokens, ERC20 tokens, Aave V3, Uniswap V3 LP.
+Built-in scanners: Native tokens, ERC20 tokens, Aave V3, Uniswap V3 LP, Compound V3, Lido, Polymarket.
 
 ### Yield Sources
 
@@ -175,7 +232,7 @@ interface YieldSource {
 }
 ```
 
-Built-in sources: Aave V3.
+Built-in sources: Aave V3, Compound V3, Lido.
 
 ### Adding a Protocol
 

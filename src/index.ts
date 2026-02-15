@@ -18,6 +18,9 @@ import {
   LiFiAggregator,
   JupiterAggregator,
   SkipGoAggregator,
+  ZeroXAggregator,
+  ParaSwapAggregator,
+  PolymarketPlugin,
   GasPricePlugin,
   PortfolioPlugin,
   TxStatusPlugin,
@@ -36,6 +39,11 @@ import { Erc20Scanner } from "./plugins/wallet-intelligence/scanners/erc20-scann
 import { AaveV3Scanner } from "./plugins/wallet-intelligence/scanners/aave-scanner.js";
 import { UniswapV3LPScanner } from "./plugins/wallet-intelligence/scanners/uniswap-v3-scanner.js";
 import { AaveYieldSource } from "./plugins/yield-finder/sources/aave-yield-source.js";
+import { CompoundV3YieldSource } from "./plugins/yield-finder/sources/compound-v3-yield-source.js";
+import { LidoYieldSource } from "./plugins/yield-finder/sources/lido-yield-source.js";
+import { CompoundV3Scanner } from "./plugins/wallet-intelligence/scanners/compound-v3-scanner.js";
+import { LidoScanner } from "./plugins/wallet-intelligence/scanners/lido-scanner.js";
+import { PolymarketScanner } from "./plugins/wallet-intelligence/scanners/polymarket-scanner.js";
 
 async function main() {
   const config = loadConfig();
@@ -64,6 +72,8 @@ async function main() {
       new LiFiAggregator(),
       new JupiterAggregator(),
       new SkipGoAggregator(),
+      new ZeroXAggregator(),
+      new ParaSwapAggregator(),
     ])
   );
   await registry.registerPlugin(new GasPricePlugin());
@@ -73,15 +83,21 @@ async function main() {
   await registry.registerPlugin(new BridgePlugin());
   await registry.registerPlugin(new EnsPlugin());
   await registry.registerPlugin(new LendingPlugin());
+  await registry.registerPlugin(new PolymarketPlugin());
 
   // 3b. Register protocol scanners (for wallet intelligence)
   registry.registerScanner(new NativeBalanceScanner());
   registry.registerScanner(new Erc20Scanner());
   registry.registerScanner(new AaveV3Scanner());
   registry.registerScanner(new UniswapV3LPScanner());
+  registry.registerScanner(new CompoundV3Scanner());
+  registry.registerScanner(new LidoScanner());
+  registry.registerScanner(new PolymarketScanner());
 
   // 3c. Register yield sources (for intent engine)
   registry.registerYieldSource(new AaveYieldSource());
+  registry.registerYieldSource(new CompoundV3YieldSource());
+  registry.registerYieldSource(new LidoYieldSource());
 
   // 3d. Register intelligence plugins
   await registry.registerPlugin(new WalletIntelligencePlugin());

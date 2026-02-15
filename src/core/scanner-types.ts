@@ -8,7 +8,8 @@ export interface ProtocolPosition {
     | "lp"
     | "staking"
     | "native"
-    | "erc20";
+    | "erc20"
+    | "prediction-market";
   chainId: string;
   chainName: string;
   assets: PositionAsset[];
