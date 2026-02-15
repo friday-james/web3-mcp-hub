@@ -56,6 +56,11 @@ import {
   Permit2Plugin,
   TxToolsPlugin,
   DexScreenerPlugin,
+  SimulationPlugin,
+  RiskPlugin,
+  HealthMonitorPlugin,
+  ILCalculatorPlugin,
+  GasOptimizerPlugin,
   WalletIntelligencePlugin,
   YieldFinderPlugin,
 } from "./plugins/index.js";
@@ -140,6 +145,13 @@ async function main() {
   await registry.registerPlugin(new Permit2Plugin());
   await registry.registerPlugin(new TxToolsPlugin());
   await registry.registerPlugin(new DexScreenerPlugin());
+
+  // 3a2. Register AI safety & intelligence plugins
+  await registry.registerPlugin(new SimulationPlugin());
+  await registry.registerPlugin(new RiskPlugin());
+  await registry.registerPlugin(new HealthMonitorPlugin());
+  await registry.registerPlugin(new ILCalculatorPlugin());
+  await registry.registerPlugin(new GasOptimizerPlugin());
 
   // 3b. Register protocol scanners (for wallet intelligence)
   registry.registerScanner(new NativeBalanceScanner());

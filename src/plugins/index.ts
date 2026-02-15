@@ -44,3 +44,8 @@ export { ChainlinkPlugin } from "./chainlink/plugin.js";
 export { Permit2Plugin } from "./permit2/plugin.js";
 export { TxToolsPlugin } from "./tx-tools/plugin.js";
 export { DexScreenerPlugin } from "./dex-screener/plugin.js";
+export { SimulationPlugin } from "./simulation/plugin.js";
+export { RiskPlugin } from "./risk/plugin.js";
+export { HealthMonitorPlugin } from "./health-monitor/plugin.js";
+export { ILCalculatorPlugin } from "./il-calculator/plugin.js";
+export { GasOptimizerPlugin } from "./gas-optimizer/plugin.js";
