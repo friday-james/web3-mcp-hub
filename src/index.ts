@@ -28,6 +28,8 @@ import {
   BridgePlugin,
   EnsPlugin,
   LendingPlugin,
+  CompoundV3Plugin,
+  LidoPlugin,
   WalletIntelligencePlugin,
   YieldFinderPlugin,
 } from "./plugins/index.js";
@@ -84,6 +86,8 @@ async function main() {
   await registry.registerPlugin(new EnsPlugin());
   await registry.registerPlugin(new LendingPlugin());
   await registry.registerPlugin(new PolymarketPlugin());
+  await registry.registerPlugin(new CompoundV3Plugin());
+  await registry.registerPlugin(new LidoPlugin());
 
   // 3b. Register protocol scanners (for wallet intelligence)
   registry.registerScanner(new NativeBalanceScanner());

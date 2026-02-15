@@ -16,3 +16,5 @@ export { YieldFinderPlugin } from "./yield-finder/plugin.js";
 export { PolymarketPlugin } from "./polymarket/plugin.js";
 export { ZeroXAggregator } from "./swap/aggregators/zerox.js";
 export { ParaSwapAggregator } from "./swap/aggregators/paraswap.js";
+export { CompoundV3Plugin } from "./compound-v3/plugin.js";
+export { LidoPlugin } from "./lido/plugin.js";
