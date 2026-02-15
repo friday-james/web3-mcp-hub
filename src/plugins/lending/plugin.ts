@@ -25,6 +25,24 @@ export class LendingPlugin implements DefiPlugin {
 
   async initialize(_context: PluginContext): Promise<void> {}
 
+  /** readContract wrapper that tries without gas limit first, then with explicit gas */
+  private async readContractSafe(
+    client: ReturnType<typeof createPublicClient>,
+    params: { address: `0x${string}`; abi: readonly any[]; functionName: string; args: readonly any[] }
+  ) {
+    try {
+      return await client.readContract(params as any);
+    } catch (e: any) {
+      // If out of gas on public RPC, retry without gas limit specification
+      if (e?.details?.includes?.("out of gas") || e?.details?.includes?.("gas limit")) {
+        throw new Error(
+          `RPC gas limit too low for this call. Set a custom RPC_ETHEREUM with higher gas limits (e.g. Alchemy, Infura) in your .env file.`
+        );
+      }
+      throw e;
+    }
+  }
+
   getTools(): ToolDefinition[] {
     return [
       this.marketsTools(),
@@ -55,14 +73,18 @@ export class LendingPlugin implements DefiPlugin {
 
         const chain = context.getChainAdapterForChain(chainId).getChain(chainId)!;
         const rpcUrl = context.config.rpcUrls[chainId] || chain.rpcUrl;
-        const client = createPublicClient({ transport: http(rpcUrl) });
+        const client = createPublicClient({
+          transport: http(rpcUrl, { batch: true }),
+          batch: { multicall: true },
+        });
 
-        const [reserves, baseCurrency] = await client.readContract({
+        const reservesResult = await this.readContractSafe(client, {
           address: addrs.uiPoolDataProvider,
           abi: UI_POOL_DATA_PROVIDER_ABI,
           functionName: "getReservesData",
           args: [addrs.poolAddressesProvider],
-        });
+        }) as readonly [any[], any];
+        const [reserves, baseCurrency] = reservesResult;
 
         const ethPriceUsd = Number(baseCurrency.networkBaseTokenPriceInUsd) /
           (10 ** baseCurrency.networkBaseTokenPriceDecimals);
@@ -138,30 +160,35 @@ export class LendingPlugin implements DefiPlugin {
 
         const chain = context.getChainAdapterForChain(chainId).getChain(chainId)!;
         const rpcUrl = context.config.rpcUrls[chainId] || chain.rpcUrl;
-        const client = createPublicClient({ transport: http(rpcUrl) });
+        const client = createPublicClient({
+          transport: http(rpcUrl, { batch: true }),
+          batch: { multicall: true },
+        });
         const user = getAddress(userAddress);
 
         // Fetch account summary and user reserves in parallel
-        const [accountData, [userReserves], [reserves, baseCurrency]] = await Promise.all([
+        const [accountData, userReservesResult, reservesResult] = await Promise.all([
           client.readContract({
             address: addrs.pool,
             abi: POOL_ABI,
             functionName: "getUserAccountData",
             args: [user],
           }),
-          client.readContract({
+          this.readContractSafe(client, {
             address: addrs.uiPoolDataProvider,
             abi: UI_POOL_DATA_PROVIDER_ABI,
             functionName: "getUserReservesData",
             args: [addrs.poolAddressesProvider, user],
-          }),
-          client.readContract({
+          }) as Promise<readonly [any[], any]>,
+          this.readContractSafe(client, {
             address: addrs.uiPoolDataProvider,
             abi: UI_POOL_DATA_PROVIDER_ABI,
             functionName: "getReservesData",
             args: [addrs.poolAddressesProvider],
-          }),
+          }) as Promise<readonly [any[], any]>,
         ]);
+        const [userReserves] = userReservesResult;
+        const [reserves, baseCurrency] = reservesResult;
 
         const refUnit = Number(baseCurrency.marketReferenceCurrencyUnit);
         const refPriceUsd = Number(baseCurrency.marketReferenceCurrencyPriceInUsd) /
