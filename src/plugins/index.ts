@@ -10,3 +10,4 @@ export { TxStatusPlugin } from "./tx-status/plugin.js";
 export { ApprovePlugin } from "./approve/plugin.js";
 export { BridgePlugin } from "./bridge/plugin.js";
 export { EnsPlugin } from "./ens/plugin.js";
+export { LendingPlugin } from "./lending/plugin.js";

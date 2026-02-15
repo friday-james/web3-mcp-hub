@@ -24,6 +24,7 @@ import {
   ApprovePlugin,
   BridgePlugin,
   EnsPlugin,
+  LendingPlugin,
 } from "./plugins/index.js";
 import { registerAllTools } from "./tools/register.js";
 
@@ -62,6 +63,7 @@ async function main() {
   await registry.registerPlugin(new ApprovePlugin());
   await registry.registerPlugin(new BridgePlugin());
   await registry.registerPlugin(new EnsPlugin());
+  await registry.registerPlugin(new LendingPlugin());
 
   // 4. Create MCP server
   const server = new McpServer({
