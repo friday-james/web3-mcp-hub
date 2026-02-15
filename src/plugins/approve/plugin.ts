@@ -41,6 +41,7 @@ export class ApprovePlugin implements DefiPlugin {
 
   getTools(): ToolDefinition[] {
     return [
+      this.revokeTool(),
       {
         name: "defi_token_approve",
         description:
@@ -193,5 +194,61 @@ export class ApprovePlugin implements DefiPlugin {
         },
       },
     ];
+  }
+
+  private revokeTool(): ToolDefinition {
+    return {
+      name: "defi_revoke_approval_tx",
+      description:
+        "Build an unsigned transaction to revoke (set to 0) a token approval. Use this to remove a spender's access to your tokens.",
+      inputSchema: z.object({
+        chainId: ChainIdSchema,
+        tokenAddress: AddressSchema.describe("ERC20 token contract address"),
+        spender: AddressSchema.describe("Spender address to revoke"),
+        ownerAddress: AddressSchema.describe("Your wallet address"),
+      }),
+      handler: async (
+        input: unknown,
+        context: PluginContext
+      ): Promise<ToolResult> => {
+        const { chainId, tokenAddress, spender, ownerAddress } = input as {
+          chainId: string; tokenAddress: string; spender: string; ownerAddress: string;
+        };
+
+        const adapter = context.getChainAdapterForChain(chainId);
+        const chain = adapter.getChain(chainId);
+        if (!chain || chain.ecosystem !== "evm") {
+          return {
+            content: [{ type: "text", text: "Token approvals are only applicable on EVM chains" }],
+            isError: true,
+          };
+        }
+
+        const token = await adapter.resolveToken(chainId, tokenAddress);
+
+        const data = encodeFunctionData({
+          abi: APPROVE_ABI,
+          functionName: "approve",
+          args: [getAddress(spender), 0n],
+        });
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              chainId: chain.id,
+              ecosystem: "evm",
+              raw: {
+                to: getAddress(tokenAddress),
+                data,
+                value: "0x0",
+                from: getAddress(ownerAddress),
+              },
+              description: `Revoke ${token?.symbol || "token"} approval for ${spender}`,
+            }, null, 2),
+          }],
+        };
+      },
+    };
   }
 }

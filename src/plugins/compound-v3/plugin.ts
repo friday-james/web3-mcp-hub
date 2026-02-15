@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { getAddress, encodeFunctionData, maxUint256 } from "viem";
+import {
+  createPublicClient,
+  http,
+  getAddress,
+  encodeFunctionData,
+  formatUnits,
+  maxUint256,
+} from "viem";
 import type {
   DefiPlugin,
   PluginContext,
@@ -12,20 +19,131 @@ import {
   COMPOUND_V3_MARKETS,
   getSupportedCompoundV3Chains,
 } from "./addresses.js";
-import { COMET_ABI } from "./abi.js";
+import { COMET_ABI, rateToApr } from "./abi.js";
 
 const SUPPORTED = getSupportedCompoundV3Chains();
 
 export class CompoundV3Plugin implements DefiPlugin {
   readonly name = "compound-v3";
   readonly description =
-    "Compound V3 lending: supply and withdraw base assets (USDC)";
+    "Compound V3 lending: markets, positions, supply and withdraw";
   readonly version = "1.0.0";
 
   async initialize(_context: PluginContext): Promise<void> {}
 
   getTools(): ToolDefinition[] {
-    return [this.supplyTxTool(), this.withdrawTxTool()];
+    return [
+      this.marketsTool(),
+      this.positionTool(),
+      this.supplyTxTool(),
+      this.withdrawTxTool(),
+    ];
+  }
+
+  private marketsTool(): ToolDefinition {
+    return {
+      name: "defi_compound_markets",
+      description: `List Compound V3 markets with supply APY, borrow APY, utilization, and TVL. Supported chains: ${SUPPORTED.join(", ")}.`,
+      inputSchema: z.object({}),
+      handler: async (_input: unknown, context: PluginContext): Promise<ToolResult> => {
+        try {
+          const results = await Promise.all(
+            SUPPORTED.map(async (chainId) => {
+              const market = COMPOUND_V3_MARKETS[chainId];
+              if (!market) return null;
+              const chain = context.getChainAdapterForChain(chainId).getChain(chainId);
+              if (!chain) return null;
+              const rpcUrl = context.config.rpcUrls[chainId] || chain.rpcUrl;
+              const client = createPublicClient({ transport: http(rpcUrl) });
+
+              try {
+                const [utilization, totalSupply, totalBorrow] = await Promise.all([
+                  client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "getUtilization" }),
+                  client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "totalSupply" }),
+                  client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "totalBorrow" }),
+                ]);
+                const [supplyRate, borrowRate] = await Promise.all([
+                  client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "getSupplyRate", args: [utilization] }),
+                  client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "getBorrowRate", args: [utilization] }),
+                ]);
+
+                return {
+                  chain: chain.name,
+                  chainId,
+                  baseToken: market.baseToken,
+                  comet: market.comet,
+                  supplyApy: `${rateToApr(supplyRate).toFixed(2)}%`,
+                  borrowApy: `${rateToApr(borrowRate).toFixed(2)}%`,
+                  totalSupply: `${Number(formatUnits(totalSupply, market.baseTokenDecimals)).toFixed(0)} ${market.baseToken}`,
+                  totalBorrow: `${Number(formatUnits(totalBorrow, market.baseTokenDecimals)).toFixed(0)} ${market.baseToken}`,
+                  utilization: `${(Number(utilization) / 1e18 * 100).toFixed(1)}%`,
+                };
+              } catch { return null; }
+            })
+          );
+
+          const markets = results.filter(Boolean);
+          return {
+            content: [{ type: "text", text: JSON.stringify({ protocol: "Compound V3", marketsCount: markets.length, markets }, null, 2) }],
+          };
+        } catch (e: any) {
+          return { content: [{ type: "text", text: `Failed to fetch Compound V3 markets: ${e.message}` }], isError: true };
+        }
+      },
+    };
+  }
+
+  private positionTool(): ToolDefinition {
+    return {
+      name: "defi_compound_position",
+      description: `Get a user's Compound V3 position: supply balance, borrow balance, and current rates. Supported chains: ${SUPPORTED.join(", ")}.`,
+      inputSchema: z.object({
+        chainId: ChainIdSchema,
+        userAddress: AddressSchema.describe("User wallet address"),
+      }),
+      handler: async (input: unknown, context: PluginContext): Promise<ToolResult> => {
+        const { chainId, userAddress } = input as { chainId: string; userAddress: string };
+        const market = COMPOUND_V3_MARKETS[chainId];
+        if (!market) return { content: [{ type: "text", text: `Compound V3 not available on "${chainId}"` }], isError: true };
+
+        const chain = context.getChainAdapterForChain(chainId).getChain(chainId);
+        if (!chain) return { content: [{ type: "text", text: `Chain "${chainId}" not found` }], isError: true };
+
+        const rpcUrl = context.config.rpcUrls[chainId] || chain.rpcUrl;
+        const client = createPublicClient({ transport: http(rpcUrl) });
+        const user = getAddress(userAddress);
+
+        try {
+          const [supplyBal, borrowBal, utilization] = await Promise.all([
+            client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "balanceOf", args: [user] }),
+            client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "borrowBalanceOf", args: [user] }),
+            client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "getUtilization" }),
+          ]);
+          const [supplyRate, borrowRate] = await Promise.all([
+            client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "getSupplyRate", args: [utilization] }),
+            client.readContract({ address: market.comet, abi: COMET_ABI, functionName: "getBorrowRate", args: [utilization] }),
+          ]);
+
+          return {
+            content: [{
+              type: "text",
+              text: JSON.stringify({
+                chain: chain.name,
+                protocol: "Compound V3",
+                user: userAddress,
+                baseToken: market.baseToken,
+                supplyBalance: `${Number(formatUnits(supplyBal, market.baseTokenDecimals)).toFixed(6)} ${market.baseToken}`,
+                borrowBalance: `${Number(formatUnits(borrowBal, market.baseTokenDecimals)).toFixed(6)} ${market.baseToken}`,
+                supplyApy: `${rateToApr(supplyRate).toFixed(2)}%`,
+                borrowApy: `${rateToApr(borrowRate).toFixed(2)}%`,
+              }, null, 2),
+            }],
+          };
+        } catch (e: any) {
+          return { content: [{ type: "text", text: `Failed to fetch position: ${e.message}` }], isError: true };
+        }
+      },
+    };
   }
 
   private supplyTxTool(): ToolDefinition {

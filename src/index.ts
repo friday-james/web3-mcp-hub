@@ -30,6 +30,32 @@ import {
   LendingPlugin,
   CompoundV3Plugin,
   LidoPlugin,
+  DefiLlamaPlugin,
+  TransfersPlugin,
+  SnapshotPlugin,
+  YearnPlugin,
+  RocketPoolPlugin,
+  SDaiPlugin,
+  CurvePlugin,
+  SecurityPlugin,
+  NftPlugin,
+  SafePlugin,
+  PendlePlugin,
+  MorphoPlugin,
+  EigenLayerPlugin,
+  BalancerPlugin,
+  UniswapV3Plugin,
+  GmxPlugin,
+  WethPlugin,
+  CoinGeckoPlugin,
+  ContractReaderPlugin,
+  OneInchAggregator,
+  AaveExtendedPlugin,
+  TokenListsPlugin,
+  ChainlinkPlugin,
+  Permit2Plugin,
+  TxToolsPlugin,
+  DexScreenerPlugin,
   WalletIntelligencePlugin,
   YieldFinderPlugin,
 } from "./plugins/index.js";
@@ -76,6 +102,7 @@ async function main() {
       new SkipGoAggregator(),
       new ZeroXAggregator(),
       new ParaSwapAggregator(),
+      new OneInchAggregator(),
     ])
   );
   await registry.registerPlugin(new GasPricePlugin());
@@ -88,6 +115,31 @@ async function main() {
   await registry.registerPlugin(new PolymarketPlugin());
   await registry.registerPlugin(new CompoundV3Plugin());
   await registry.registerPlugin(new LidoPlugin());
+  await registry.registerPlugin(new DefiLlamaPlugin());
+  await registry.registerPlugin(new TransfersPlugin());
+  await registry.registerPlugin(new SnapshotPlugin());
+  await registry.registerPlugin(new YearnPlugin());
+  await registry.registerPlugin(new RocketPoolPlugin());
+  await registry.registerPlugin(new SDaiPlugin());
+  await registry.registerPlugin(new CurvePlugin());
+  await registry.registerPlugin(new SecurityPlugin());
+  await registry.registerPlugin(new NftPlugin());
+  await registry.registerPlugin(new SafePlugin());
+  await registry.registerPlugin(new PendlePlugin());
+  await registry.registerPlugin(new MorphoPlugin());
+  await registry.registerPlugin(new EigenLayerPlugin());
+  await registry.registerPlugin(new BalancerPlugin());
+  await registry.registerPlugin(new UniswapV3Plugin());
+  await registry.registerPlugin(new GmxPlugin());
+  await registry.registerPlugin(new WethPlugin());
+  await registry.registerPlugin(new CoinGeckoPlugin());
+  await registry.registerPlugin(new ContractReaderPlugin());
+  await registry.registerPlugin(new AaveExtendedPlugin());
+  await registry.registerPlugin(new TokenListsPlugin());
+  await registry.registerPlugin(new ChainlinkPlugin());
+  await registry.registerPlugin(new Permit2Plugin());
+  await registry.registerPlugin(new TxToolsPlugin());
+  await registry.registerPlugin(new DexScreenerPlugin());
 
   // 3b. Register protocol scanners (for wallet intelligence)
   registry.registerScanner(new NativeBalanceScanner());
