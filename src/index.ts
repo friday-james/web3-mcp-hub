@@ -61,6 +61,8 @@ import {
   HealthMonitorPlugin,
   ILCalculatorPlugin,
   GasOptimizerPlugin,
+  DegenPlugin,
+  LeveragePlugin,
   WalletIntelligencePlugin,
   YieldFinderPlugin,
 } from "./plugins/index.js";
@@ -152,6 +154,8 @@ async function main() {
   await registry.registerPlugin(new HealthMonitorPlugin());
   await registry.registerPlugin(new ILCalculatorPlugin());
   await registry.registerPlugin(new GasOptimizerPlugin());
+  await registry.registerPlugin(new DegenPlugin());
+  await registry.registerPlugin(new LeveragePlugin());
 
   // 3b. Register protocol scanners (for wallet intelligence)
   registry.registerScanner(new NativeBalanceScanner());

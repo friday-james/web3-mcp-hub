@@ -1,6 +1,6 @@
 # DeFi MCP
 
-An MCP server that gives AI agents native access to DeFi. **10 chains, 113 tools, 43 plugins, 6 swap aggregators** — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
+An MCP server that gives AI agents native access to DeFi. **10 chains, 124 tools, 45 plugins, 6 swap aggregators** — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
 
 Connect it to Claude, Cursor, or any MCP-compatible client and interact with DeFi using natural language.
 
@@ -98,7 +98,7 @@ Use these settings in your MCP client configuration:
 | **Solana** | Solana |
 | **Cosmos** | Osmosis, Cosmos Hub |
 
-## Tools (113)
+## Tools (124)
 
 ### Intelligence & Analytics
 
@@ -130,6 +130,26 @@ Use these settings in your MCP client configuration:
 | `defi_yield_vs_hold` | Compare LP, lending, staking, and holding strategies for a given token and timeframe. |
 | `defi_compare_gas` | Compare gas costs across all EVM chains to find the cheapest for an operation. |
 | `defi_operation_costs` | Get gas cost estimates for all common DeFi operations on a specific chain. |
+
+### Degen Tools
+
+| Tool | Description |
+|------|-------------|
+| `defi_arb_finder` | Find arbitrage opportunities across DEXes/chains for a token. Shows spread, profit estimate, and route. |
+| `defi_whale_watch` | Track a whale wallet's recent token transfers and activity. |
+| `defi_new_pairs` | Find newly created DEX trading pairs with liquidity and volume data. |
+| `defi_copy_trade` | Get a wallet's holdings for copy trading strategies. |
+| `defi_lp_lock_check` | Check if a token's LP is locked or at risk of rug pull. Analyzes liquidity, age, buy/sell ratio. |
+| `defi_multi_quote` | Get swap quotes from ALL aggregators at once and compare for best execution. |
+| `defi_top_gainers` | Top gaining and losing tokens in 24h — what degens are aping into. |
+
+### Leverage & Position Sizing
+
+| Tool | Description |
+|------|-------------|
+| `defi_leverage_loop_plan` | Plan a leverage loop on Aave V3: calculate loops, effective APY, liquidation price, health factor. |
+| `defi_leverage_loop_tx` | Build the supply→borrow transaction sequence for one leverage loop iteration. |
+| `defi_position_size` | Calculate optimal position size using Kelly criterion, risk tolerance, and stop loss. |
 
 ### Token & Price Data
 
@@ -384,6 +404,8 @@ src/
 │   ├── health-monitor/ # Cross-protocol lending health + stablecoin peg monitor
 │   ├── il-calculator/  # Impermanent loss calculator and strategy comparison
 │   ├── gas-optimizer/  # Cross-chain gas comparison and operation cost estimates
+│   ├── degen/          # Arb finder, whale tracking, new pairs, LP lock check, copy trade
+│   ├── leverage/       # Leverage loops on Aave, position sizing (Kelly criterion)
 │   ├── wallet-intelligence/  # Multi-protocol wallet scanning
 │   │   └── scanners/         # Native, ERC20, Aave, Uniswap V3, Compound V3, Lido, Polymarket
 │   └── yield-finder/         # Cross-chain yield optimization

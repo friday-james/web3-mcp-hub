@@ -49,3 +49,5 @@ export { RiskPlugin } from "./risk/plugin.js";
 export { HealthMonitorPlugin } from "./health-monitor/plugin.js";
 export { ILCalculatorPlugin } from "./il-calculator/plugin.js";
 export { GasOptimizerPlugin } from "./gas-optimizer/plugin.js";
+export { DegenPlugin } from "./degen/plugin.js";
+export { LeveragePlugin } from "./leverage/plugin.js";
