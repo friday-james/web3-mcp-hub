@@ -1,6 +1,6 @@
 # DeFi MCP
 
-An MCP server that gives AI agents native access to DeFi. **10 chains, 103 tools, 38 plugins, 6 swap aggregators** — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
+An MCP server that gives AI agents native access to DeFi. **10 chains, 113 tools, 43 plugins, 6 swap aggregators** — through a single [Model Context Protocol](https://modelcontextprotocol.io) server.
 
 Connect it to Claude, Cursor, or any MCP-compatible client and interact with DeFi using natural language.
 
@@ -8,10 +8,12 @@ Connect it to Claude, Cursor, or any MCP-compatible client and interact with DeF
 "Scan this wallet for all DeFi positions"
 "Find me the best yield for 10,000 USDC"
 "Swap 1 ETH to USDC on Arbitrum"
-"What's my Aave health factor?"
-"Show me trending tokens right now"
-"Read the totalSupply from this contract"
-"Get Chainlink oracle price for ETH/USD"
+"Simulate this transaction before I sign it"
+"Is this token safe to buy? Check for honeypots"
+"Check my Aave health factor across all chains"
+"Compare the cost of this swap on every chain"
+"Audit my token approvals for risky contracts"
+"Calculate impermanent loss on my ETH/USDC LP"
 ```
 
 ## Quick Start
@@ -96,7 +98,7 @@ Use these settings in your MCP client configuration:
 | **Solana** | Solana |
 | **Cosmos** | Osmosis, Cosmos Hub |
 
-## Tools (103)
+## Tools (113)
 
 ### Intelligence & Analytics
 
@@ -112,6 +114,22 @@ Use these settings in your MCP client configuration:
 | `defi_dex_search` | Search DEX trading pairs across all chains by name, symbol, or address. |
 | `defi_dex_token_pairs` | All DEX trading pairs for a token with real-time price and volume. |
 | `defi_dex_trending` | Trending/boosted tokens on DexScreener. |
+
+### AI Safety & Risk
+
+| Tool | Description |
+|------|-------------|
+| `defi_simulate_tx` | Dry-run a transaction to check if it will succeed or revert before signing. Reports gas cost and balance checks. |
+| `defi_simulate_bundle` | Simulate a sequence of transactions (e.g. approve → swap) to verify the whole flow works. |
+| `defi_protocol_risk` | Risk-score a DeFi protocol based on TVL, age, audits, chain presence, and hack history. |
+| `defi_pre_trade_check` | Comprehensive pre-trade safety check: honeypot detection, tax analysis, liquidity depth, contract verification. |
+| `defi_approval_audit` | Audit all active token approvals for a wallet. Flags unlimited approvals and unknown spenders. |
+| `defi_health_dashboard` | Monitor all lending positions (Aave + Compound) across all chains. Alerts on liquidation risk. |
+| `defi_stablecoin_monitor` | Monitor stablecoin peg health for USDT, USDC, DAI, etc. Alerts on depegging. |
+| `defi_impermanent_loss` | Calculate IL for LP positions with dollar amounts, fee comparison, and scenario analysis. |
+| `defi_yield_vs_hold` | Compare LP, lending, staking, and holding strategies for a given token and timeframe. |
+| `defi_compare_gas` | Compare gas costs across all EVM chains to find the cheapest for an operation. |
+| `defi_operation_costs` | Get gas cost estimates for all common DeFi operations on a specific chain. |
 
 ### Token & Price Data
 
@@ -361,6 +379,11 @@ src/
 │   ├── security/       # Token and address security audits
 │   ├── token-lists/    # Token search and popular addresses
 │   ├── contract-reader/# Generic contract reads and multicall
+│   ├── simulation/     # Transaction simulation and bundle dry-runs
+│   ├── risk/           # Protocol risk scoring, pre-trade checks, approval audits
+│   ├── health-monitor/ # Cross-protocol lending health + stablecoin peg monitor
+│   ├── il-calculator/  # Impermanent loss calculator and strategy comparison
+│   ├── gas-optimizer/  # Cross-chain gas comparison and operation cost estimates
 │   ├── wallet-intelligence/  # Multi-protocol wallet scanning
 │   │   └── scanners/         # Native, ERC20, Aave, Uniswap V3, Compound V3, Lido, Polymarket
 │   └── yield-finder/         # Cross-chain yield optimization
