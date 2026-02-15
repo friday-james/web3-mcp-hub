@@ -7,9 +7,8 @@ import type {
   TokenInfo,
 } from "../../../core/types.js";
 import { AggregatorError } from "../../../core/errors.js";
-import { parseTokenAmount, formatTokenAmount } from "../../../core/utils.js";
 
-const JUPITER_API = "https://api.jup.ag";
+const JUPITER_API = "https://lite-api.jup.ag/swap/v1";
 
 export class JupiterAggregator implements SwapAggregator {
   readonly name = "jupiter";
@@ -22,16 +21,15 @@ export class JupiterAggregator implements SwapAggregator {
     request: SwapRequest,
     _chain: ChainInfo
   ): Promise<SwapQuote> {
-    const url = new URL(`${JUPITER_API}/swap/v1/quote`);
+    const url = new URL(`${JUPITER_API}/quote`);
     url.searchParams.set("inputMint", request.srcToken);
     url.searchParams.set("outputMint", request.dstToken);
-    // Jupiter expects amounts in smallest unit
+    // Jupiter expects amounts in smallest unit (lamports)
     url.searchParams.set("amount", request.amount);
     url.searchParams.set(
       "slippageBps",
       String(request.slippageBps || 50)
     );
-    url.searchParams.set("restrictIntermediateTokens", "true");
 
     const res = await fetch(url);
     if (!res.ok) {
@@ -43,7 +41,8 @@ export class JupiterAggregator implements SwapAggregator {
 
     // Build route description from routePlan
     const route = (data.routePlan || []).map(
-      (step: { swapInfo: { label: string } }) => step.swapInfo?.label || "unknown"
+      (step: { swapInfo: { label: string } }) =>
+        step.swapInfo?.label || "unknown"
     );
 
     const srcToken: TokenInfo = {
@@ -76,10 +75,10 @@ export class JupiterAggregator implements SwapAggregator {
 
   async buildTransaction(
     request: SwapRequest,
-    chain: ChainInfo
+    _chain: ChainInfo
   ): Promise<UnsignedTransaction> {
     // Step 1: get quote
-    const quoteUrl = new URL(`${JUPITER_API}/swap/v1/quote`);
+    const quoteUrl = new URL(`${JUPITER_API}/quote`);
     quoteUrl.searchParams.set("inputMint", request.srcToken);
     quoteUrl.searchParams.set("outputMint", request.dstToken);
     quoteUrl.searchParams.set("amount", request.amount);
@@ -87,7 +86,6 @@ export class JupiterAggregator implements SwapAggregator {
       "slippageBps",
       String(request.slippageBps || 50)
     );
-    quoteUrl.searchParams.set("restrictIntermediateTokens", "true");
 
     const quoteRes = await fetch(quoteUrl);
     if (!quoteRes.ok) {
@@ -97,7 +95,7 @@ export class JupiterAggregator implements SwapAggregator {
     const quoteData = await quoteRes.json();
 
     // Step 2: build swap transaction
-    const swapRes = await fetch(`${JUPITER_API}/swap/v1/swap`, {
+    const swapRes = await fetch(`${JUPITER_API}/swap`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

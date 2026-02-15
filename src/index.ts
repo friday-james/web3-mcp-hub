@@ -18,6 +18,12 @@ import {
   LiFiAggregator,
   JupiterAggregator,
   SkipGoAggregator,
+  GasPricePlugin,
+  PortfolioPlugin,
+  TxStatusPlugin,
+  ApprovePlugin,
+  BridgePlugin,
+  EnsPlugin,
 } from "./plugins/index.js";
 import { registerAllTools } from "./tools/register.js";
 
@@ -50,6 +56,12 @@ async function main() {
       new SkipGoAggregator(),
     ])
   );
+  await registry.registerPlugin(new GasPricePlugin());
+  await registry.registerPlugin(new PortfolioPlugin());
+  await registry.registerPlugin(new TxStatusPlugin());
+  await registry.registerPlugin(new ApprovePlugin());
+  await registry.registerPlugin(new BridgePlugin());
+  await registry.registerPlugin(new EnsPlugin());
 
   // 4. Create MCP server
   const server = new McpServer({

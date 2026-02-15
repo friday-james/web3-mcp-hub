@@ -44,7 +44,8 @@ export class LiFiAggregator implements SwapAggregator {
       fromToken: request.srcToken,
       toToken: request.dstToken,
       fromAmount: parseTokenAmount(request.amount, 18), // Will be overridden by resolved decimals
-      fromAddress: request.userAddress || "0x0000000000000000000000000000000000000000",
+      // Li.Fi requires a valid non-zero fromAddress even for quotes
+      fromAddress: request.userAddress || "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     });
 
     if (request.slippageBps) {

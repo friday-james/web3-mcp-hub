@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "defi-mcp": {
+      "command": "node",
+      "args": ["/home/james/Documents/Projects/njamez/defi-mcp/dist/index.js"]
+    }
+  }
+}
